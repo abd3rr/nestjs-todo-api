@@ -4,12 +4,16 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TodoModule } from './todos/todos.module';
+import { Sequelize } from 'sequelize';
+import { SequelizeModule } from '@nestjs/sequelize';
 
 
 
 @Module({
-  imports: [ConfigModule.forRoot(),
-    TypeOrmModule.forRootAsync({
+  imports: [ConfigModule.forRoot({
+    isGlobal: true,
+  }),
+  TypeOrmModule.forRootAsync({
     imports: [ConfigModule, TodoModule],
     inject: [ConfigService],
     useFactory: (configService: ConfigService) => ({
@@ -19,16 +23,20 @@ import { TodoModule } from './todos/todos.module';
       username: configService.get('POSTGRES_USER'),
       password: configService.get('POSTGRES_PASSWORD'),
       database: configService.get('POSTGRES_DB'),
-      entities: [],
+      entities: ['dist/**/*.entity.js'],
+      migrations: ['dist/migrations/*.js'],
+      logging: true,
       autoLoadEntities: true,
-      synchronize: true,
-      isGlobal: true,
+      synchronize: false,
+
     })
-   
-    }),
+
+  }),
+
+    TodoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 
 })
-export class AppModule {}
+export class AppModule { }
