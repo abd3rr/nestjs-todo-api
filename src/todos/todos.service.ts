@@ -1,8 +1,9 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { Todo } from "./todos.model";
 import { CreateTodoDto } from "./dto/create-todo.dto";
 import { InternalServerErrorException } from '@nestjs/common';
 import { TodoRepository } from "./todo.repository";
+import { Not } from "typeorm";
 
 
 
@@ -27,9 +28,30 @@ export class TodoService {
 
     }
 
+    async update(id: string, createTodoDTO: CreateTodoDto): Promise<Todo> {
+
+        const todo = await this.getTodoById(id);
+        if (this.isDeleted(todo)) throw new NotFoundException(`Todo with id ${id} not found`);
+
+        try {
+
+            Object.assign(todo, createTodoDTO);
+            return await this.todoRepository.save(todo);
+
+        } catch (error) {
+
+            throw new InternalServerErrorException('Error updating to do: ' + error.message);
+        }
+    }
+
     async softDelete(id: string): Promise<void> {
         return await this.todoRepository.softDelete(id);
     }
+
+    isDeleted(todo: Todo): boolean {
+        return todo.deletedAt != null ? true : false;
+    }
+
 
 
 }

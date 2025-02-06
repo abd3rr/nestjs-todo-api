@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Put } from "@nestjs/common";
 import { TodoService } from "./todos.service";
 import { Todo } from "./todos.model";
 import { CreateTodoDto } from "./dto/create-todo.dto";
@@ -24,6 +24,16 @@ export class TodoController {
     @HttpCode(HttpStatus.CREATED)
     async createTodo(@Body() createTodoDTO: CreateTodoDto): Promise<Todo> {
         return await this.todoService.save(createTodoDTO);
+    }
+
+    @Put(':id')
+    async update(@Param('id') id: string, @Body() createTodoDTO: CreateTodoDto): Promise<Todo> {
+        return await this.todoService.update(id, createTodoDTO);
+    }
+
+    @Patch(':id')
+    async updatePartial(@Param('id') id: string, @Body() createTodoDTO: CreateTodoDto): Promise<Todo> {
+        return await this.todoService.update(id, createTodoDTO);
     }
 
     @Delete(':id')
